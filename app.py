@@ -15,6 +15,7 @@ def moon_phase():
     data = request.json
     observer = data['observer']
 
+    # AstronomyAPI endpoint
     url = "https://api.astronomyapi.com/api/v2/bodies/phase/moon"
     params = {
         "latitude": observer["latitude"],
@@ -23,15 +24,15 @@ def moon_phase():
         "to_date": observer["date"]
     }
 
-    # Prepare basic auth manually
-    auth_str = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
-    b64_auth = base64.b64encode(auth_str.encode()).decode()
+    # Proper Base64-encoded Authorization header
+    auth_string = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    b64_auth = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8')
     headers = {
         "Authorization": f"Basic {b64_auth}"
     }
 
-    resp = requests.get(url, params=params, headers=headers)
-    return jsonify(resp.json())
+    response = requests.get(url, params=params, headers=headers)
+    return jsonify(response.json())
 
 
 @app.route('/moon-rise-set', methods=['POST'])
@@ -46,15 +47,15 @@ def moon_rise_set():
         "date": observer["date"]
     }
 
-    # Prepare basic auth manually
-    auth_str = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
-    b64_auth = base64.b64encode(auth_str.encode()).decode()
+    auth_string = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    b64_auth = base64.b64encode(auth_string.encode('utf-8')).decode('utf-8')
     headers = {
         "Authorization": f"Basic {b64_auth}"
     }
 
-    resp = requests.get(url, params=params, headers=headers)
-    return jsonify(resp.json())
+    response = requests.get(url, params=params, headers=headers)
+    return jsonify(response.json())
+
 
 
 
