@@ -12,22 +12,31 @@ ASTRO_APP_SECRET = os.getenv('ASTRO_APP_SECRET')
 @app.route('/moon-phase', methods=['POST'])
 def moon_phase():
     data = request.json
-    resp = requests.post(
-        'https://api.astronomyapi.com/api/v2/studio/moon-phase',
-        json=data,
-        auth=(ASTRO_APP_ID, ASTRO_APP_SECRET)
-    )
+    observer = data['observer']
+    url = "https://api.astronomyapi.com/api/v2/bodies/phase/moon"
+    params = {
+        "latitude": observer["latitude"],
+        "longitude": observer["longitude"],
+        "from_date": observer["date"],
+        "to_date": observer["date"]
+    }
+    resp = requests.get(url, params=params, auth=(ASTRO_APP_ID, ASTRO_APP_SECRET))
     return jsonify(resp.json())
+
 
 @app.route('/moon-rise-set', methods=['POST'])
 def moon_rise_set():
     data = request.json
-    resp = requests.post(
-        'https://api.astronomyapi.com/api/v2/studio/moon-rise-set',
-        json=data,
-        auth=(ASTRO_APP_ID, ASTRO_APP_SECRET)
-    )
+    observer = data['observer']
+    url = "https://api.astronomyapi.com/api/v2/rise-set/moon"
+    params = {
+        "latitude": observer["latitude"],
+        "longitude": observer["longitude"],
+        "date": observer["date"]
+    }
+    resp = requests.get(url, params=params, auth=(ASTRO_APP_ID, ASTRO_APP_SECRET))
     return jsonify(resp.json())
+
 
 if __name__ == '__main__':
     app.run(debug=True)
