@@ -25,8 +25,14 @@ def moon_phase():
         "to_date": observer["date"]
     }
 
-    auth = HTTPBasicAuth(ASTRO_APP_ID, ASTRO_APP_SECRET)
-    response = requests.get(url, params=params, auth=auth)
+    userpass = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    authString = base64.b64encode(userpass.encode()).decode()
+
+    headers = {
+        "Authorization": f"Basic {authString}"
+    }
+
+    response = requests.get(url, params=params, headers=headers)
     return jsonify(response.json())
 
 
@@ -44,9 +50,16 @@ def moon_rise_set():
         "date": observer["date"]
     }
 
-    auth = HTTPBasicAuth(ASTRO_APP_ID, ASTRO_APP_SECRET)
-    response = requests.get(url, params=params, auth=auth)
+    userpass = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    authString = base64.b64encode(userpass.encode()).decode()
+
+    headers = {
+        "Authorization": f"Basic {authString}"
+    }
+
+    response = requests.get(url, params=params, headers=headers)
     return jsonify(response.json())
+
 
 
 
