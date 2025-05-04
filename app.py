@@ -3,6 +3,8 @@ import requests
 from flask_cors import CORS
 import os
 import base64
+from requests.auth import HTTPBasicAuth
+
 
 app = Flask(__name__)
 CORS(app)
@@ -20,13 +22,13 @@ def moon_phase():
         "latitude": observer["latitude"],
         "longitude": observer["longitude"],
         "from_date": observer["date"],
-        "to_date": observer["date"],
-        "app_id": ASTRO_APP_ID,
-        "app_secret": ASTRO_APP_SECRET
+        "to_date": observer["date"]
     }
 
-    response = requests.get(url, params=params)
+    auth = HTTPBasicAuth(ASTRO_APP_ID, ASTRO_APP_SECRET)
+    response = requests.get(url, params=params, auth=auth)
     return jsonify(response.json())
+
 
 
 
@@ -39,13 +41,13 @@ def moon_rise_set():
     params = {
         "latitude": observer["latitude"],
         "longitude": observer["longitude"],
-        "date": observer["date"],
-        "app_id": ASTRO_APP_ID,
-        "app_secret": ASTRO_APP_SECRET
+        "date": observer["date"]
     }
 
-    response = requests.get(url, params=params)
+    auth = HTTPBasicAuth(ASTRO_APP_ID, ASTRO_APP_SECRET)
+    response = requests.get(url, params=params, auth=auth)
     return jsonify(response.json())
+
 
 
 
