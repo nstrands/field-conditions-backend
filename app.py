@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from flask_cors import CORS
 import os
+import base64
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +14,7 @@ ASTRO_APP_SECRET = os.getenv('ASTRO_APP_SECRET')
 def moon_phase():
     data = request.json
     observer = data['observer']
+
     url = "https://api.astronomyapi.com/api/v2/bodies/phase/moon"
     params = {
         "latitude": observer["latitude"],
@@ -20,7 +22,15 @@ def moon_phase():
         "from_date": observer["date"],
         "to_date": observer["date"]
     }
-    resp = requests.get(url, params=params, auth=(ASTRO_APP_ID, ASTRO_APP_SECRET))
+
+    # Prepare basic auth manually
+    auth_str = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    b64_auth = base64.b64encode(auth_str.encode()).decode()
+    headers = {
+        "Authorization": f"Basic {b64_auth}"
+    }
+
+    resp = requests.get(url, params=params, headers=headers)
     return jsonify(resp.json())
 
 
@@ -28,14 +38,24 @@ def moon_phase():
 def moon_rise_set():
     data = request.json
     observer = data['observer']
+
     url = "https://api.astronomyapi.com/api/v2/rise-set/moon"
     params = {
         "latitude": observer["latitude"],
         "longitude": observer["longitude"],
         "date": observer["date"]
     }
-    resp = requests.get(url, params=params, auth=(ASTRO_APP_ID, ASTRO_APP_SECRET))
+
+    # Prepare basic auth manually
+    auth_str = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
+    b64_auth = base64.b64encode(auth_str.encode()).decode()
+    headers = {
+        "Authorization": f"Basic {b64_auth}"
+    }
+
+    resp = requests.get(url, params=params, headers=headers)
     return jsonify(resp.json())
+
 
 
 if __name__ == '__main__':
