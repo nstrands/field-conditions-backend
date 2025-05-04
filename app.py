@@ -1,70 +1,55 @@
 from flask import Flask, request, jsonify
 import requests
-from flask_cors import CORS
-import os
 import base64
-from requests.auth import HTTPBasicAuth
+import os
+from dotenv import load_dotenv
 
+# Load credentials from .env file if present
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
 
-ASTRO_APP_ID = os.getenv('ASTRO_APP_ID')
-ASTRO_APP_SECRET = os.getenv('ASTRO_APP_SECRET')
+# Get credentials from environment variables
+APP_ID = os.getenv("ASTRO_APP_ID")
+APP_SECRET = os.getenv("ASTRO_APP_SECRET")
 
-@app.route('/moon-phase', methods=['POST'])
-def moon_phase():
-    data = request.json
-    observer = data['observer']
+def get_auth_header():
+    """Return the properly formatted Basic Auth header."""
+    userpass = f"{APP_ID}:{APP_SECRET}"
+    auth_encoded = base64.b64encode(userpass.encode()).decode()
+    return {"Authorization": f"Basic {auth_encoded}"}
 
-    url = "https://api.astronomyapi.com/api/v2/bodies/phase/moon"
+@app.route('/positions', methods=['GET'])
+def get_positions():
+    # Required query parameters from the client
+    latitude = request.args.get("latitude")
+    longitude = request.args.get("longitude")
+    elevation = request.args.get("elevation", "0")  # default to sea level
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
+    time = request.args.get("time", "00:00:00")  # default to midnight
+
+    if not all([latitude, longitude, from_date, to_date]):
+        return jsonify({"error": "Missing required query parameters."}), 400
+
+    # Assemble request to AstronomyAPI
+    url = "https://api.astronomyapi.com/api/v2/bodies/positions"
+    headers = get_auth_header()
     params = {
-        "latitude": observer["latitude"],
-        "longitude": observer["longitude"],
-        "from_date": observer["date"],
-        "to_date": observer["date"]
+        "latitude": latitude,
+        "longitude": longitude,
+        "elevation": elevation,
+        "from_date": from_date,
+        "to_date": to_date,
+        "time": time
     }
 
-    userpass = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
-    authString = base64.b64encode(userpass.encode()).decode()
-
-    headers = {
-        "Authorization": f"Basic {authString}"
-    }
-
-    response = requests.get(url, params=params, headers=headers)
-    return jsonify(response.json())
-
-
-
-
-@app.route('/moon-rise-set', methods=['POST'])
-def moon_rise_set():
-    data = request.json
-    observer = data['observer']
-
-    url = "https://api.astronomyapi.com/api/v2/rise-set/moon"
-    params = {
-        "latitude": observer["latitude"],
-        "longitude": observer["longitude"],
-        "date": observer["date"]
-    }
-
-    userpass = f"{ASTRO_APP_ID}:{ASTRO_APP_SECRET}"
-    authString = base64.b64encode(userpass.encode()).decode()
-
-    headers = {
-        "Authorization": f"Basic {authString}"
-    }
-
-    response = requests.get(url, params=params, headers=headers)
-    return jsonify(response.json())
-
-
-
-
-
-
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
