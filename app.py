@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 # API credentials from env
-OW_API_KEY     = os.getenv("OPENWEATHER_API_KEY")
+OPENWEATHER_API_KEY     = os.getenv("OPENWEATHER_API_KEY")
 TIDES_API_KEY = os.getenv("TIDES_API_KEY")
 ASTRO_ID      = os.getenv("ASTRO_APP_ID")
 ASTRO_SECRET  = os.getenv("ASTRO_APP_SECRET")
@@ -25,7 +25,7 @@ def get_auth_header():
 def weather():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
-    if not all([lat, lon, OW_API_KEY]):
+    if not all([lat, lon, OPENWEATHER_API_KEY]):
         return jsonify({"error": "Missing params or API key"}), 400
 
     # call One Call 3.0 but only pull the 'current' block
@@ -35,7 +35,7 @@ def weather():
         "lon": lon,
         "exclude": "minutely,hourly,daily,alerts",
         "units": "imperial",
-        "appid": OW_API_KEY
+        "appid": OPENWEATHER_API_KEY
     }
     r = requests.get(url, params=params)
     r.raise_for_status()
@@ -64,7 +64,7 @@ def weather():
 def forecast():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
-    if not all([lat, lon, OW_API_KEY]):
+    if not all([lat, lon, OPENWEATHER_API_KEY]):
         return jsonify({"error": "Missing params or API key"}), 400
 
     # call One Call 3.0 but only pull the 'daily' block
@@ -74,7 +74,7 @@ def forecast():
         "lon": lon,
         "exclude": "current,minutely,hourly,alerts",
         "units": "imperial",
-        "appid": OW_API_KEY
+        "appid": OPENWEATHER_API_KEY
     }
     r = requests.get(url, params=params)
     r.raise_for_status()
@@ -98,10 +98,10 @@ def forecast():
 def air_pollution():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
-    if not all([lat,lon,OW_API_KEY]):
+    if not all([lat,lon,OPENWEATHER_API_KEY]):
         return jsonify({"error":"Missing params or API key"}),400
     url = "https://api.openweathermap.org/data/2.5/air_pollution"
-    params = dict(lat=lat, lon=lon, appid=OW_API_KEY)
+    params = dict(lat=lat, lon=lon, appid=OPENWEATHER_API_KEY)
     r = requests.get(url, params=params); r.raise_for_status()
     return jsonify(r.json())
 
